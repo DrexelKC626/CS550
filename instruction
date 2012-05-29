@@ -1,0 +1,33 @@
+Mini language interpreter in java:
+
+Run:
+  The interpreter is a runnable jar package.
+  To run the interpreter for part1, use command:
+	java -jar mini.jar <input-file>
+  Here:
+	<input-file> is the input containing statement list of mini language.
+	The default value is the file named as "input".
+  Sample:
+	java -jar mini.jar input
+  Or you can run the code by:
+	make run-part1
+  Here:  
+	The input will be the default file.
+  
+  To run the interpreter for part2, use command:
+	java -jar mini.jar <-f input-file> <-s memory-size>
+  Here:
+	-f 	The next parameter is the input file.
+		Default: "input".
+	-s	The next parameter is the memory size.
+		Default: 8192.
+  Sample:
+	java -jar mini_gc.jar -f input -s 8192
+  Or you can run the code by:
+        make run-part1
+  Here:  
+        The input will be the default file.
+
+The sample input is sample_input.
+Notice that the last statement in statement-list should end without a ';' 
+according to the grammer.

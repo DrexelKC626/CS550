@@ -1,0 +1,8 @@
+define lengthRec
+  proc (L)
+    if nullp(L) then
+      return 0
+    else
+      return lengthRec(cdr(L)) + 1
+    fi
+  end

@@ -1,0 +1,117 @@
+Assignment 4 by group 4.
+
+File included:
+
+Code of mini language in java.
+
+part1/:
+  Sources for part1.
+    Element.java: The class to store both integer and list.
+    Program.java: The class for actions of the parser.
+    Run.java: The main class to read input the do run the parser.
+
+part2/:
+  Sources for part2.
+    Element.java: The class to store both integer and list.
+    Block.java: The class to present the list and contains a array for memory.
+    Program.java: The class for actions of the parser.
+    Run.java: The main class to read input the do run the parser.
+
+lib/:
+  java-cup-11a.jar:
+    CUP lib to compile the code and generate the parser.
+
+interpreter.flx:
+FLEX file to generate scanner.
+
+interpreter.cup:
+CUP file to generate parser.
+
+mianClass:
+META file to define the main class.
+
+Makefile:
+The file to compile the code and generate runnable jar packages. 
+
+instruction:
+Provide instructions on how to run the code.
+
+=======================================================================================
+
+Instructions:
+
+Compile & Use:
+To compile the code, use:
+  $ make
+Two jar packages will be generated:
+  mini.jar and mini-gc.jar.
+To run the code:
+part1:
+  java -jar mini.jar <input-file>
+part2:
+  java -jar mini_gc.jar <-f input-file> <-s memory-size>
+The detail is introduced in file instruction.
+
+Notice that the last statement in statement-list should end without a ';' 
+according to the grammer.
+
+======================================================================================
+How the function works:
+
+Part1:
+  The interpreter will read mini language from a file and out put the
+  environment into stdout.
+  The interpreter use jflex to generate the scanner and use CUP to generate
+  parser. The parse will then call corresponding class to evaluate the
+  statement.
+  Program.java contains the code to evaluate statements. The result would be 
+  an element, which is used to store both list and integer.
+
+Part2:
+  Part 2 implements garbage collection. The method is implemented in
+  Block.java. The class contains an element, the index in the array and
+  the index of next block. The class contains a static array used as the 
+  memory. The algorithm is implemented in the function garbageCollection.
+
+======================================================================================
+Test cases: (For both part 1 and part 2)
+
+To test the code, we use mini language in file sample_input.
+The result is:
+
+Dumping out all the variables...
+isList=1
+isNull=1
+isNotNull=0
+lr=2
+n=-5
+cdrResult=[[5,[6,7,8]]]
+i=0
+testY=[[[1,2],[10,11]],[5,[6,7,8]]]
+li=2
+carResult=[[1,2],[10,11]]
+fact=120
+testx=[3,4]
+isNotList=0
+consResult=[[[[1,2],[10,11]],[5,[6,7,8]]],3,4]
+isNotInt=0
+null=[]
+isInt=1
+Function: lengthItr defined...
+Function: lengthRec defined...
+#0
+
+Here the memory size is 8192 in the second part.
+To test if the gc algorithm works good, we use the following code with 
+memory size of 8:
+L := [1,2,3];
+M := [4,5];
+N := [6,7,8];
+N := 0;
+N := [1]
+The result is:
+Dumping out all the variables...
+L=[1,2,3]
+M=[4,5]
+N=[1]
+#0

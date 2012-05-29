@@ -1,0 +1,161 @@
+/* This is the cup file for the mini language.
+ */
+
+import java_cup.runtime.*;
+import java.util.*;
+
+action code {:
+	/* code inserted into CUP$actions class
+	 * it is used by the code embedded the grammar */
+
+	/* hm is used to store and retrieve values of variables */
+	public HashMap hm = new HashMap();
+	/* var stores the used variable names, this is not necessary
+	 * but helpful to dump all the values at the end */
+	public LinkedList var = new LinkedList();
+        /* ft is used to store and retrieve the functions */
+        public HashMap ft = new HashMap();
+:}
+
+parser code {:
+
+	/* this part is included in the parser class */
+	public static void main (String args[]) throws Exception{
+		new parser(new Yylex(System.in)).parse();
+	}
+:}
+
+terminal SEMI, PLUS, MINUS, TIMES, ASSIGN, LPAREN, RPAREN;
+terminal IF, THEN, ELSE, FI, WHILE, DO, OD, REPEAT, UNTIL;
+terminal DEFINE, PROC, END,RETURN;
+terminal Integer NUMBER;
+terminal COMMA;
+terminal String ID;
+terminal LSQURE, RSQURE, OR, CONS, CAR, NULLP, LISTP, CDR, INTP;
+
+non terminal Program program;
+non terminal StatementList statement_list;
+non terminal ParamList param_list;
+non terminal ExpressionList expr_list;
+non terminal Statement statement, assign_statement, if_statement, while_statement, repeat_statement, define_statement, return_statement;
+non terminal Expr expr, term, factor, funcall, listelement, sequence, list;
+
+program ::= statement_list:list
+	    {: Program program = new Program(list);
+	       program.eval(hm, ft, var);
+	       program.dump(hm, ft, var);
+	     :};
+
+statement_list ::= statement:s
+		    {: RESULT = new StatementList(s); :}
+		  | statement:s SEMI statement_list:sl 
+		    {: /* insert a new statement at the end of the existing statement list */
+		       sl.insert(s); RESULT = sl; :};
+
+statement ::= assign_statement:a
+	      {: RESULT = a; :}
+            | define_statement:d
+              {: RESULT = d; :}
+	    | if_statement:i
+	      {: RESULT = i; :}
+	    | while_statement:w
+	      {: RESULT = w; :}
+            | return_statement:rs
+              {: RESULT = rs; :}
+            | repeat_statement:r
+              {: RESULT = r; :};
+
+assign_statement ::= ID:i ASSIGN expr:e
+		     {: RESULT = new AssignStatement(i,e); 
+		     :};
+
+define_statement ::= DEFINE ID:i PROC LPAREN param_list:pl RPAREN statement_list:sl END
+                     {: RESULT = new DefineStatement(i,new Proc(pl,sl));
+                     :};
+
+if_statement ::= IF expr:e THEN statement_list:s1 ELSE statement_list:s2 FI
+		 {: RESULT = new IfStatement(e,s1,s2); :};
+
+while_statement ::= WHILE expr:e DO statement_list:s OD
+		 {: RESULT = new WhileStatement(e,s); :};
+
+repeat_statement ::= REPEAT statement_list:sl UNTIL expr:e
+                 {: RESULT = new RepeatStatement(sl,e); :};
+
+return_statement ::= RETURN expr:e
+                 {: RESULT = new ReturnStatement(e); :};
+
+
+param_list ::= ID:i COMMA param_list:pl
+                 {: RESULT = new ParamList(i,pl); :}
+                 | ID:i
+                 {: RESULT = new ParamList(i); :};
+
+expr ::= expr:e PLUS term:t
+	 {: RESULT = new Plus(e,t); :}
+       | expr:e MINUS term:t
+	 {: RESULT = new Minus(e,t); :}
+       | expr:e OR term:t
+         {: RESULT = new Conc(e,t); :}
+       | term:t
+	 {: RESULT = t; :};
+
+term ::= term:t TIMES factor:f
+         {: RESULT = new Times(t,f); :}
+       | factor:f
+	 {: RESULT = f; :};
+
+factor ::= LPAREN expr:e RPAREN
+	   {: RESULT = e; :}
+	 | NUMBER:n
+	   {: RESULT = new Number(n); :}
+         | list:l
+           {: RESULT = l; :}
+	 | ID:i
+	   {: RESULT = new Ident(i); :}
+         | funcall:fc
+           {: RESULT = fc; :};
+
+/* My change */
+/*concatenation ::= list:l OR concatenation:c
+		  {: RESULT = new Conc(l,c); :}
+		| list:l
+		  {: RESULT = l; :}
+		| factor:f
+		  {: RESULT = f; :};*/
+
+list ::= LSQURE sequence:s RSQURE
+	 {: RESULT = s; :}
+       | LSQURE RSQURE
+	 {: RESULT = new List(); :};
+
+sequence ::= listelement:le COMMA sequence:s
+	     {: RESULT = new List(le,s); :}
+	   | listelement:le
+	     {: RESULT = new List(le); :};
+
+listelement ::= list:l
+	        {: RESULT = l; :}
+	      | NUMBER:n
+		{: RESULT = new Number(n); :};
+	    
+funcall ::= CAR LPAREN expr:e RPAREN
+	    {: RESULT = new Car(e); :}
+        | CDR LPAREN expr:l RPAREN
+	    {: RESULT = new Cdr(l); :}
+	  | INTP LPAREN expr:e RPAREN
+	    {: RESULT = new Intp(e); :}
+	  | NULLP LPAREN expr:e RPAREN
+	    {: RESULT = new Nullp(e); :}
+	  | LISTP LPAREN expr:e RPAREN
+	    {: RESULT = new Listp(e); :}
+	  | CONS LPAREN expr:e COMMA expr:l RPAREN
+	    {: RESULT = new Cons(e,l); :}
+	  | ID:i LPAREN expr_list:el RPAREN
+            {: RESULT = new FunctionCall(i,el); :};
+
+expr_list ::= expr:ex COMMA expr_list:el
+            {: RESULT = new ExpressionList(ex,el); :}
+            | expr:ex 
+            {: RESULT = new ExpressionList(ex);   :};
+            

@@ -1,0 +1,9 @@
+define lengthItr
+  proc (L)
+    i := 0;
+    while (1-nullp(L)) do
+      i := i + 1;
+      L := cdr(L)
+    od;
+    return i
+  end
